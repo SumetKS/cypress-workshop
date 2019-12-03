@@ -1,0 +1,9 @@
+{
+    "baseUrl": "http://54.255.188.220/",
+    "env":{
+        "MTL_AGENCY_SMP_VERSION": "Agency SMP Version 1.0.0.0", 
+        "LOGIN_SETTING_FILE": "users/20191204_user_agencyORD",
+        "HEADER_SETTING_FILE": "headers/20191204_header.json"
+
+    }
+}
