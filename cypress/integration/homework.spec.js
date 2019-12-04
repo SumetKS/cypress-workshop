@@ -1,64 +1,46 @@
 describe("AgencySMP/api", function(){
-    beforeEach(function(){
+    before(function(){
         cy.prepareData(Cypress.env("HEADER_SETTING_FILE"), "headers")
-        cy.prepareData(Cypress.env("LOGIN_SETTING_FILE"), "credential")
+        cy.prepareData(Cypress.env("LOGIN_SETTING_FILE"), "credential").then(function(){
+                cy.log( this.headers)
+                cy.request({
+                    url:  "AgencySMP/api/Auth/GetToken",
+                    method: "POST",
+                    headers: this.headers,
+                    body: this.credential,
+                    failOnStatusCode: false
+                }).as("tokenResponse")
+         
+                cy.get("@tokenResponse").then(function(tokenResponse){
+                    cy.log(tokenResponse)
+                })
+        })
+    });
 
+    beforeEach(function(){
         cy.request({
             url: "AgencySMP/api/version",
             method: "GET"
         }).as("apiVersion")
-
-        cy.get("@headers").then(function(headers){
-            headers = headers
-        })
-        cy.get("@credential").then(function(credential){
-            credential = credential
-        })
-    });
-
-    before(function(){
-       // it("Should login success", function(){
-        
-            cy.request({
-                url:  "AgencySMP/api/Auth/GetToken",
-                method: "POST",
-                headers: headers,
-                body: credential,
-                failOnStatusCode: false
-            }).as("getTokenResponse")
-            // .its("header")
-            // .should("be.eq", 200)
-    
-            cy.get("@getTokenResponse").then(function(getTokenResponse){
-                // const { access_token } = this.getTokenResponse.body
-                
-                // expect(username).to.be.eq(tagName)
-                cy.log(getTokenResponse)
-            })
-       // })
        
     })
 
     
     
     it("Should LoadSettings success", function(){
-        cy.get("@getTokenResponse").then(function(getTokenResponse){
-            const { access_token } = this.getTokenResponse
+        
+            const { access_token } = this.tokenResponse.body
 
             cy.request({
-                url: "api/Setting/LoadSettings",
+                url: "AgencySMP/api/Setting/LoadSettings?agentCode=" + this.credential.userName,
                 method: "GET",
-                headers: {
-                   "Authorization" : "Bearer " + access_token
-                },
+                headers: this.headers,
+                'auth': {
+                    'bearer':  access_token
+                  },
                 failOnStatusCode: false
             })
-            .its("header")
+            .its("status")
             .should("be.eq", 200)
-        })
-
-        
     })
-
-    
 })
